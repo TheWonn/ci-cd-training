@@ -38,8 +38,20 @@ module Commands
       say ok "#{msg}\n#{start_help_msg(container_name)}"
     end
 
-    desc 'stop[CONTAINER_NAME]', 'Stop running container'
+    desc 'up', 'Bring up environment to support the current exercise'
+    def up
 
+      run "COURSEWARE_VERSION=#{courseware_version} COURSEWARE_IMAGE=#{courseware_image} docker-compose up -d --remove-orphans"
+    end
+
+    desc 'dow', 'Bring down environment supporting current exercise'
+    def down
+      result = run "COURSEWARE_VERSION=#{courseware_version} COURSEWARE_IMAGE=#{courseware_image} docker-compose down"
+      puts result.stderr
+      puts result.stdout
+    end
+
+    desc 'stop[CONTAINER_NAME]', 'Stop running container'
     def stop(container_name)
       if docker_container_running?(container_name)
         remove_container(container_name)
@@ -64,6 +76,14 @@ module Commands
 
       def normalise(string)
         string.gsub(%r{[:/]}, '-')
+      end
+
+      def courseware_version
+        File.read("#{__dir__}/../../../../../.courseware-version")
+      end
+
+      def courseware_image
+        File.read("#{__dir__}/../../../../../.courseware-image")
       end
     end
   end
